@@ -1,0 +1,28 @@
+# Ambiente e Segredos
+.env
+.env.*
+!.env.example
+
+# Python (Back-end)
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+
+# Editor (VS Code)
+.vscode/
+
+# Sistema Operacional (macOS)
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+
+# Flutter (Geralmente o .gitignore interno já cuida, mas por segurança)
+.dart_tool/
+build/
