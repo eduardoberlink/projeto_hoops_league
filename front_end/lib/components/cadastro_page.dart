@@ -13,7 +13,8 @@ class _CadastroPageState extends State<CadastroPage> {
   final TextEditingController nomeController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController passwordconfirmController = TextEditingController();
+  final TextEditingController passwordconfirmController =
+      TextEditingController();
 
   final formKey = GlobalKey<FormState>();
 
@@ -25,34 +26,37 @@ class _CadastroPageState extends State<CadastroPage> {
   bool obscurePasswordConfirmar = true;
   bool loading = false;
 
+  void cadastro() async {
+    print("CADASTRO CHAMADO");
+    if (formKey.currentState!.validate()) {
+      print("FORM VÁLIDO");
+      final sucesso = await ApiService.register({
+        "user": userController.text,
+        "nome": nomeController.text,
+        "email": emailController.text,
+        "senha": passwordController.text,
+        "confirmar_senha": passwordconfirmController.text,
+        "idade": 0, // depois vamos preencher
+        "altura": 0.0,
+        "posicao_preferida": "nao_sei",
+      });
 
-void cadastro() async {
-  if (formKey.currentState!.validate()) {
-    final sucesso = await ApiService.register({
-      "user": userController.text,
-      "nome": nomeController.text,
-      "email": emailController.text,
-      "senha": passwordController.text,
-      "confirmar_senha": passwordconfirmController.text,
-      "idade": 0, // depois vamos preencher
-      "altura": 0.0,
-      "posicao_preferida": "nao_sei"
-    });
-
-    if (sucesso) {
-      await ApiService.login(emailController.text, passwordController.text);
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => PositionPage()),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erro ao cadastrar")),
-      );
+      if (sucesso) {
+        await ApiService.login(emailController.text, passwordController.text);
+        print("LOGIN OK");
+        print("TOKEN: ${ApiService.token}");
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => PositionPage()),
+        );
+      } else {
+        print("FORM INVÁLIDO");
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Erro ao cadastrar")));
+      }
     }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -91,64 +95,80 @@ void cadastro() async {
 
                 SizedBox(height: 15),
 
-                // NOME
                 TextFormField(
                   controller: nomeController,
                   style: TextStyle(color: branco),
                   decoration: InputDecoration(
-                    labelText: "Nome",
+                    labelText: "Nome:",
                     labelStyle: TextStyle(color: branco),
-                    prefixIcon: Icon(Icons.person, color: branco),
+                    prefixIcon: Icon(
+                      Icons.people,
+                      color: branco,
+                    ),
+                    hintText: "Informe seu nome completo",
+                    contentPadding: EdgeInsets.symmetric(vertical: 18),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: branco),
+                    ),
                   ),
                   validator: (value) =>
-                      value!.isEmpty ? "Informe o nome" : null,
+                      value!.isEmpty ? "informe o nome completo" : null,
                 ),
-
                 SizedBox(height: 15),
-
-                // USER
                 TextFormField(
                   controller: userController,
                   style: TextStyle(color: branco),
                   decoration: InputDecoration(
-                    labelText: "Usuário",
+                    labelText: "Usuário:",
                     labelStyle: TextStyle(color: branco),
-                    prefixIcon: Icon(Icons.account_circle, color: branco),
+                    prefixIcon: Icon(Icons.supervised_user_circle, color: branco,),
+                    hintText: "Digite seu usuário",
+                    contentPadding: EdgeInsets.symmetric(vertical: 18),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: branco)
+                    )
                   ),
-                  validator: (value) =>
-                      value!.isEmpty ? "Informe o usuário" : null,
+                  validator: (value) => value!.isEmpty ? "Informe o usuário" : null,
                 ),
-
                 SizedBox(height: 15),
-
-                // EMAIL
                 TextFormField(
                   controller: emailController,
                   style: TextStyle(color: branco),
                   decoration: InputDecoration(
-                    labelText: "Email",
+                    labelText: "E-mail:",
                     labelStyle: TextStyle(color: branco),
-                    prefixIcon: Icon(Icons.email, color: branco),
+                    hintText: "Jogador@mail.com",
+                    prefixIcon: Icon(Icons.email_outlined, color: branco),
+                    contentPadding: EdgeInsets.symmetric(vertical: 18),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: branco),
+                    ),
                   ),
                   validator: (value) {
                     if (value == null || !value.contains('@')) {
-                      return "Email inválido";
+                      return "email inválido";
                     }
                     return null;
                   },
                 ),
-
                 SizedBox(height: 15),
-
-                // SENHA
                 TextFormField(
                   controller: passwordController,
-                  obscureText: obscurePassword,
                   style: TextStyle(color: branco),
+                  obscureText: obscurePassword,
                   decoration: InputDecoration(
-                    labelText: "Senha",
+                    labelText: "Senha:",
                     labelStyle: TextStyle(color: branco),
-                    prefixIcon: Icon(Icons.lock, color: branco),
+                    hintText: "Digite sua senha",
+                    prefixIcon: Icon(Icons.supervised_user_circle, color: branco),
+                    contentPadding: EdgeInsets.symmetric(vertical: 18),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: branco),
+                    ),
                     suffixIcon: IconButton(
                       onPressed: () {
                         setState(() {
@@ -164,50 +184,92 @@ void cadastro() async {
                     ),
                   ),
                 ),
-
                 SizedBox(height: 15),
-
-                // CONFIRMAR SENHA
                 TextFormField(
                   controller: passwordconfirmController,
-                  obscureText: obscurePasswordConfirmar,
                   style: TextStyle(color: branco),
+                  obscureText: obscurePasswordConfirmar,
                   decoration: InputDecoration(
-                    labelText: "Confirmar senha",
+                    labelText: "    Confirmação senha",
                     labelStyle: TextStyle(color: branco),
+                    hintText: "Confirme sua senha",
+                    contentPadding: EdgeInsets.symmetric(vertical: 18),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: branco),
+                    ),
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          obscurePasswordConfirmar = !obscurePasswordConfirmar;
+                        });
+                      },
+                      icon: Icon(
+                        obscurePasswordConfirmar
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        color: branco,
+                      ),
+                    ),
                   ),
                   validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "confirme sua senha";
+                    }
                     if (value != passwordController.text) {
-                      return "Senhas diferentes";
+                      return "As senhas não são iguais";
                     }
                     return null;
                   },
                 ),
-
                 SizedBox(height: 30),
 
-                // BOTÃO
                 SizedBox(
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: loading ? null : cadastro,
+                    onPressed: cadastro,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: laranja,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(50),
                       ),
                     ),
-                    child: loading
-                        ? CircularProgressIndicator(color: preto)
-                        : Text(
-                            "CADASTRAR",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: preto,
-                            ),
-                          ),
+                    child: Text(
+                      "CADASTRAR",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: preto,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 15),
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: TextStyle(color: branco, fontSize: 14),
+                    children: [
+                      TextSpan(
+                        text: "Clicando em 'cadastrar' você aceita nossos",
+                      ),
+                      TextSpan(
+                        text: " termos",
+                        style: TextStyle(
+                          color: laranja,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      TextSpan(text: " e "),
+                      TextSpan(
+                        text: "condições",
+                        style: TextStyle(
+                          color: laranja,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],

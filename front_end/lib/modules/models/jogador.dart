@@ -22,12 +22,12 @@ class Jogador {
   factory Jogador.fromJson(Map<String, dynamic> json) {
     return Jogador(
       nome: json['nome'] ?? "",
-      usuario: json['user'] ?? "", // 🔥 corrigido (backend usa 'user')
+      usuario: json['user'] ?? "",
       overall: json['overall'] ?? 0,
-      foto_url: json['foto_url'] ?? "", // 🔥 fallback seguro
-      idade: json['idade'] ?? 0, // 🔥 corrigido
+      foto_url: json['foto_url'] ?? "",
+      idade: json['idade'] ?? 0, 
       email: json['email'] ?? "",
-      altura: (json['altura'] ?? 0).toDouble(), // 🔥 evita erro de tipo
+      altura: (json['altura'] ?? 0).toDouble(), 
     );
   }
 

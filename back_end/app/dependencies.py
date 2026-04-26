@@ -1,39 +1,26 @@
-from fastapi import Depends, HTTPException
-from sqlalchemy.orm import Session
+from fastapi import Depends,HTTPException
+from models.models import db
+from app.config import SECRET_KEY, ALGORITHM,oauth2_schema
+from sqlalchemy.orm import sessionmaker, Session
+from models.models import Jogador
 from jose import jwt, JWTError
 
-from app.database import SessionLocal
-from app.models.models import Jogador
-from app.config import SECRET_KEY, ALGORITHM, oauth2_schema
 
-
-
-def get_db():
-    db = SessionLocal()
+def pegar_sessao():
     try:
-        yield db
-    finally:
-        db.close()
+        Session= sessionmaker(bind=db)
+        session= Session()
+        yield session
+    finally:    
+        session.close()
 
-
-
-def verificar_token(
-    token: str = Depends(oauth2_schema),
-    db: Session = Depends(get_db)
-):
+def verificar_token(token: str =Depends(oauth2_schema),session: Session=Depends(pegar_sessao)):
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id = payload.get("sub")
-
-        if user_id is None:
-            raise HTTPException(status_code=401, detail="Token inválido")
-
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Acesso negado")
-
-    usuario = db.query(Jogador).filter(Jogador.id == user_id).first()
-
+        dic_info=jwt.decode(token,SECRET_KEY, ALGORITHM)
+        id_usuario=dic_info.get("sub")
+    except JWTError :    
+        raise HTTPException(status_code=401,detail="acesso Negado,verifique a validade do token")
+    usuario=session.query(Jogador).filter(Jogador.id==id_usuario).first()
     if not usuario:
-        raise HTTPException(status_code=401, detail="Usuário não encontrado")
-
-    return usuario
+        raise HTTPException(status_code=401,datail="Acesso Invalido")
+    return usuario       

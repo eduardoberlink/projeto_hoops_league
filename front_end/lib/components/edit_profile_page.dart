@@ -16,11 +16,20 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final senhaController = TextEditingController();
   final confirmarSenhaController = TextEditingController();
 
+  String? posicaoSelecionada;
   bool loading = true;
 
   static const preto = Color(0xFF1A1413);
   static const laranja = Color(0xFFED5223);
   static const branco = Color(0xFFFDFDFD);
+
+  final List<Map<String, String>> posicoes = const [
+    {"value": "armador", "label": "Armador"},
+    {"value": "ala_armador", "label": "Ala-Armador"},
+    {"value": "ala", "label": "Ala"},
+    {"value": "ala_pivo", "label": "Ala-Pivô"},
+    {"value": "pivo", "label": "Pivô"},
+  ];
 
   @override
   void initState() {
@@ -28,36 +37,44 @@ class _EditProfilePageState extends State<EditProfilePage> {
     carregarUsuario();
   }
 
-  // 🔥 BUSCA DADOS ATUAIS
   void carregarUsuario() async {
     final user = await ApiService.getProfile();
 
     if (user != null) {
-      nomeController.text = user["nome"];
-      idadeController.text = user["idade"].toString();
-      emailController.text = user["email"];
-      alturaController.text = user["altura"].toString();
+      nomeController.text = user["nome"] ?? "";
+      idadeController.text = (user["idade"] ?? 0).toString();
+      emailController.text = user["email"] ?? "";
+      alturaController.text = (user["altura"] ?? 0).toString();
+      posicaoSelecionada = user["posicao_preferida"];
     }
 
     setState(() => loading = false);
   }
 
-  // 🔥 SALVAR NO BACKEND
   void salvar() async {
     setState(() => loading = true);
 
-    final response = await ApiService.put(
-      "/auth/editar-me",
-      {
-        "nome": nomeController.text,
-        "idade": int.tryParse(idadeController.text) ?? 0,
-        "email": emailController.text,
-        "altura": double.tryParse(alturaController.text) ?? 0,
-        "posicao_preferida": "ala", // ⚠️ ajuste depois
-        "senha": senhaController.text,
-        "confirmar_senha": confirmarSenhaController.text
-      },
-    );
+    final Map<String, dynamic> dados = {
+      "nome": nomeController.text,
+      "idade": int.tryParse(idadeController.text) ?? 0,
+      "email": emailController.text,
+      "altura": double.tryParse(alturaController.text) ?? 0,
+      "posicao_preferida": posicaoSelecionada,
+    };
+
+    if (senhaController.text.isNotEmpty) {
+      if (senhaController.text != confirmarSenhaController.text) {
+        setState(() => loading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("As senhas não coincidem")),
+        );
+        return;
+      }
+      dados["senha"] = senhaController.text;
+      dados["confirmar_senha"] = confirmarSenhaController.text;
+    }
+
+    final response = await ApiService.put("/auth/editar-me", dados);
 
     setState(() => loading = false);
 
@@ -65,12 +82,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Perfil atualizado com sucesso")),
       );
-
-      Navigator.pop(context, true); // 👈 força reload no profile
+      Navigator.pop(context, true);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Erro ao atualizar perfil")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Erro ao atualizar perfil")));
     }
   }
 
@@ -97,73 +113,132 @@ class _EditProfilePageState extends State<EditProfilePage> {
             children: [
               TextField(
                 controller: nomeController,
-                style: const TextStyle(color: branco),
-                decoration: const InputDecoration(
+                style: TextStyle(color: branco),
+                decoration: InputDecoration(
                   labelText: "Nome",
                   labelStyle: TextStyle(color: branco),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: branco),
+                  ),
+                  
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(
+                      color: branco,
+                      width: 2,
+                    ), 
+                  ),
                 ),
               ),
 
-              const SizedBox(height: 10),
+              const SizedBox(height: 13),
 
               TextField(
                 controller: idadeController,
                 keyboardType: TextInputType.number,
-                style: const TextStyle(color: branco),
-                decoration: const InputDecoration(
+                style: TextStyle(color: branco),
+                decoration: InputDecoration(
                   labelText: "Idade",
                   labelStyle: TextStyle(color: branco),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: branco),
+                  ),
+                  
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(
+                      color: branco,
+                      width: 2,
+                    ), 
+                  ),
                 ),
               ),
 
-              const SizedBox(height: 10),
+              const SizedBox(height: 13),
 
               TextField(
                 controller: emailController,
-                style: const TextStyle(color: branco),
-                decoration: const InputDecoration(
+                style: TextStyle(color: branco),
+                decoration: InputDecoration(
                   labelText: "Email",
                   labelStyle: TextStyle(color: branco),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: branco),
+                  ),
+                  
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(
+                      color: branco,
+                      width: 2,
+                    ), 
+                  ),
                 ),
               ),
 
-              const SizedBox(height: 10),
+              const SizedBox(height: 13),
 
               TextField(
                 controller: alturaController,
                 keyboardType: TextInputType.number,
-                style: const TextStyle(color: branco),
-                decoration: const InputDecoration(
+                style: TextStyle(color: branco),
+                decoration:  InputDecoration(
                   labelText: "Altura",
                   labelStyle: TextStyle(color: branco),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: branco),
+                  ),
+                  
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(
+                      color: branco,
+                      width: 2,
+                    ), 
+                  ),
                 ),
               ),
 
-              const SizedBox(height: 10),
+              const SizedBox(height: 13),
 
-              TextField(
-                controller: senhaController,
-                obscureText: true,
-                style: const TextStyle(color: branco),
-                decoration: const InputDecoration(
-                  labelText: "Nova senha",
+              DropdownButtonFormField<String>(
+                value: posicaoSelecionada,
+                dropdownColor: preto,
+                style:  TextStyle(color: branco),
+                decoration:  InputDecoration(
+                  labelText: "Posição",
                   labelStyle: TextStyle(color: branco),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: branco),
+                  ),
+                  
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(
+                      color: branco,
+                      width: 2,
+                    ), 
+                  ),
                 ),
+                items: posicoes
+                    .map(
+                      (p) => DropdownMenuItem(
+                        value: p["value"],
+                        child: Text(p["label"]!),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) {
+                  setState(() => posicaoSelecionada = value);
+                },
               ),
 
-              const SizedBox(height: 10),
-
-              TextField(
-                controller: confirmarSenhaController,
-                obscureText: true,
-                style: const TextStyle(color: branco),
-                decoration: const InputDecoration(
-                  labelText: "Confirmar senha",
-                  labelStyle: TextStyle(color: branco),
-                ),
-              ),
-
-              const SizedBox(height: 30),
+              const SizedBox(height: 300),
 
               SizedBox(
                 width: double.infinity,
@@ -172,10 +247,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   onPressed: salvar,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: laranja,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                   ),
                   child: const Text(
                     "Salvar",
-                    style: TextStyle(color: branco),
+                    style: TextStyle(
+                      color: branco,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),

@@ -1,0 +1,1 @@
+from .models import Base, Jogador, Time, Competicao, Jogo, Torneio, Partida, Participacao, Formacao_Time, Classificacao, Time_Jogo, Estatistica

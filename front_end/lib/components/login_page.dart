@@ -1,7 +1,7 @@
 // ignore_for_file: use_build_context_synchronously, avoid_print
 import 'package:flutter/material.dart';
 import 'package:front_end/components/cadastro_page.dart';
-import 'package:front_end/components/position_page.dart';
+import 'package:front_end/components/profile_page.dart';
 import 'package:front_end/services/api_services.dart'; 
 
 class LoginPage extends StatefulWidget {
@@ -40,7 +40,7 @@ class _LoginPageState extends State<LoginPage> {
     if (sucesso) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => PositionPage()),
+        MaterialPageRoute(builder: (context) => ProfilePage()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
